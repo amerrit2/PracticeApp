@@ -1,19 +1,86 @@
 package com.adam.practiceapp
 
+import android.content.Context
 import android.os.Bundle
+import android.util.AttributeSet
+import android.util.Log
+import android.view.*
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
+import android.widget.Adapter
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.annotations.SchedulerSupport
+import io.reactivex.internal.schedulers.SchedulerMultiWorkerSupport
+import io.reactivex.internal.util.HalfSerializer
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.toObservable
+import io.reactivex.schedulers.Schedulers
 
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
+import java.util.*
+import java.util.concurrent.TimeUnit
+
+const val TAG = "MAIN_ACTIVITY"
+
+class TextViewAdapter(private val data: List<Int>) : RecyclerView.Adapter<TextViewAdapter.TextViewHolder>() {
+    init {
+        Log.i("MAIN", "Creating textViewAdapter")
+    }
+    class TextViewHolder(val view: TextView) : RecyclerView.ViewHolder(view)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextViewHolder {
+        Log.i("MAIN", "Creating $viewType")
+        val textView = TextView(parent.context)
+        textView.textSize = 40F
+        return TextViewHolder(textView)
+    }
+
+    override fun getItemCount(): Int {
+        return data.size
+    }
+
+    override fun onBindViewHolder(holder: TextViewHolder, position: Int) {
+        val item = data[position]
+        holder.view.text = "$item"
+    }
+}
 
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+
+        val myData = mutableListOf(1, 2, 3)
+        val adapter = TextViewAdapter(myData)
+        myRecycler.adapter = adapter
+        myRecycler.layoutManager = LinearLayoutManager(this)
+
+        val myList = listOf(1, 2, 3)
+
+        myList.toObservable()
+            .observeOn(Schedulers.io())
+            .map {
+                Log.e(TAG, "Mapping on thread: ${Thread.currentThread()}")
+                it + 3
+            }
+            .subscribeOn(Schedulers.computation())
+            .subscribe({
+                Log.e(TAG, "Adding on ${Thread.currentThread()}")
+                myData.add(it)
+                adapter.notifyDataSetChanged()
+                textView.text = "Setting text"
+            }, {
+                Log.e("MAIN", it.message)
+                throw it
+            })
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
