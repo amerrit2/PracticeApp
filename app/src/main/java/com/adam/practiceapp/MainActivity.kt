@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity() {
                 throw it
             })
 
-        GlobalScope.async {
+        GlobalScope.launch {
             val result = Service.makeRequest()
             runOnUiThread {
                 myData.add(123)
