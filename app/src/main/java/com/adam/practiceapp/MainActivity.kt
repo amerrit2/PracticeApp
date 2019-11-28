@@ -23,6 +23,8 @@ import io.reactivex.schedulers.Schedulers
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -66,21 +68,30 @@ class MainActivity : AppCompatActivity() {
         val myList = listOf(1, 2, 3)
 
         myList.toObservable()
-            .observeOn(Schedulers.io())
             .map {
-                Log.e(TAG, "Mapping on thread: ${Thread.currentThread()}")
+                Log.e(TAG, "Mapping on thread: ${Thread.currentThread().name}")
                 it + 3
             }
             .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                Log.e(TAG, "Adding on ${Thread.currentThread()}")
+                Log.e(TAG, "Adding on ${Thread.currentThread().name}")
                 myData.add(it)
                 adapter.notifyDataSetChanged()
                 textView.text = "Setting text"
             }, {
-                Log.e("MAIN", it.message)
+                Log.e("MAIN", it.message ?: "Error message not found")
                 throw it
             })
+
+        GlobalScope.async {
+            val result = Service.makeRequest()
+            runOnUiThread {
+                myData.add(123)
+                adapter.notifyDataSetChanged()
+                textView.text = result.toString()
+            }
+        }
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
