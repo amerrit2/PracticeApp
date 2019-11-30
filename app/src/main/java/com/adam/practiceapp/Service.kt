@@ -1,27 +1,33 @@
 package com.adam.practiceapp
 
 import android.util.Log
+import com.fasterxml.jackson.databind.ObjectMapper
+import loge
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 
-class Service {
-    val TAG = "SERVICE"
+data class GenericResponse(val status: String, val message: String?)
 
+class Service {
     companion object {
-        fun makeRequest() {
-            Log.e(TAG, "Making Request")
+        private val jsonMapper = ObjectMapper()
+        fun makeRequest(): GenericResponse {
+            loge("Making Request")
             val request = JSONObject()
-            request.put("requestName", "henry")
-            request.put("requestInput", JSONObject())
+            request.put("requestName", "createUser")
+            request.put("requestInput", JSONObject(
+                        mapOf("username" to "harry",
+                            "password" to "harrysPassword",
+                            "email" to "invalidEmail")))
+
+            loge(request.toString())
 
             return URL("https://practice-app-service.herokuapp.com/api")
                 .openConnection()
                 .let {
-                    Log.e(TAG, "Connection opened")
+                    loge("Connection opened")
                     it as HttpURLConnection
                 }.apply {
                     setRequestProperty("Content-Type", "application/json; charset=utf-8")
@@ -31,24 +37,20 @@ class Service {
                     val outputWriter = OutputStreamWriter(outputStream)
                     outputWriter.write(request.toString())
                     outputWriter.flush()
-                    Log.e(TAG, "Post sent")
                 }.let {
                     if (it.responseCode == 200) it.inputStream else it.errorStream
                 }.let { streamToRead ->
-                    Log.e(TAG, "Got stream")
-                    BufferedReader(InputStreamReader(streamToRead)).use {
-                        val response = StringBuffer()
-
-                        var inputLine = it.readLine()
-                        while (inputLine != null) {
-                            response.append(inputLine)
-                            inputLine = it.readLine()
+                    BufferedReader(streamToRead.reader()).use {
+                        jsonMapper.readTree(streamToRead).let { node ->
+                            val payload = node.get("payload")
+                            GenericResponse(
+                                payload.get("status").asText(),
+                                payload.get("message").asText()
+                            )
                         }
-                        it.close()
-                        response.toString()
                     }
-                }
 
+                }
         }
     }
 }

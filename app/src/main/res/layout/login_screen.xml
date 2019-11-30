@@ -1,14 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BlankFragment">
+    android:orientation="vertical"
+    tools:context=".LoginFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/createUserText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_user"
+            android:textAlignment="center" />
+
+        <EditText
+            android:id="@+id/nameEntry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/name_hint"
+            android:inputType="textPersonName"
+            android:textAlignment="center"
+            android:autofillHints="name"/>
+
+        <EditText
+            android:id="@+id/emailEntry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/email_hint"
+            android:inputType="textEmailAddress"
+            android:autofillHints="email"/>
+
+        <EditText
+            android:id="@+id/passwordEntry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/email_hint"
+            android:inputType="textPassword"
+            android:autofillHints="password"/>
+
+
+    </androidx.constraintlayout.widget.Guideline>
+
+
+
+</LinearLayout>

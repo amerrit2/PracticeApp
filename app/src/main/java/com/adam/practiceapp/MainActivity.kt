@@ -1,6 +1,7 @@
 package com.adam.practiceapp
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
@@ -26,77 +27,25 @@ import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import loge
+import logi
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-const val TAG = "MAIN_ACTIVITY"
 
-class TextViewAdapter(private val data: List<Int>) : RecyclerView.Adapter<TextViewAdapter.TextViewHolder>() {
-    init {
-        Log.i("MAIN", "Creating textViewAdapter")
-    }
-    class TextViewHolder(val view: TextView) : RecyclerView.ViewHolder(view)
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextViewHolder {
-        Log.i("MAIN", "Creating $viewType")
-        val textView = TextView(parent.context)
-        textView.textSize = 40F
-        return TextViewHolder(textView)
-    }
-
-    override fun getItemCount(): Int {
-        return data.size
-    }
-
-    override fun onBindViewHolder(holder: TextViewHolder, position: Int) {
-        val item = data[position]
-        holder.view.text = "$item"
-    }
-}
-
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), LoginFragment.OnFragmentInteractionListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-
-        val myData = mutableListOf(1, 2, 3)
-        val adapter = TextViewAdapter(myData)
-        myRecycler.adapter = adapter
-        myRecycler.layoutManager = LinearLayoutManager(this)
-
-        val myList = listOf(1, 2, 3)
-
-        myList.toObservable()
-            .map {
-                Log.e(TAG, "Mapping on thread: ${Thread.currentThread().name}")
-                it + 3
-            }
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                Log.e(TAG, "Adding on ${Thread.currentThread().name}")
-                myData.add(it)
-                adapter.notifyDataSetChanged()
-                textView.text = "Setting text"
-            }, {
-                Log.e("MAIN", it.message ?: "Error message not found")
-                throw it
-            })
-
-        GlobalScope.launch {
-            val result = Service.makeRequest()
-            runOnUiThread {
-                myData.add(123)
-                adapter.notifyDataSetChanged()
-                textView.text = result.toString()
-            }
-        }
-
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
+
+            supportFragmentManager.beginTransaction().add(R.id.mainContainer,
+                LoginFragment.newInstance())
+                .commit()
         }
     }
 
@@ -114,5 +63,9 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onFragmentInteraction(uri: Uri) {
+        loge("On fragment interaction called")
     }
 }
